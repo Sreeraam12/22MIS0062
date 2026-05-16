@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react"
 import { fetchNotifications } from "../api/notificationApi"
 import { Log } from "../api/loggerApi"
+import { sortByPriority } from "../utils/prioritySort"
+import PriorityInbox from "../components/PriorityInbox"
+import NotificationCard from "../components/NotificationCard"
 
 export default function Home() {
   const [notifications, setNotifications] = useState([])
+  const [priorityNotifications, setPriorityNotifications] = useState([])
 
   useEffect(() => {
     async function loadNotifications() {
@@ -18,11 +22,18 @@ export default function Home() {
 
       setNotifications(data)
 
+      const sortedNotifications =
+        sortByPriority(data)
+
+      setPriorityNotifications(
+        sortedNotifications
+      )
+
       Log(
         "frontend",
         "info",
         "api",
-        "Notifications fetched successfully"
+        "Priority inbox generated"
       )
     }
 
@@ -30,17 +41,34 @@ export default function Home() {
   }, [])
 
   return (
-    <div>
-      <h1>Campus Notifications</h1>
+  <div style={{ padding: "20px" }}>
+    <h1
+      style={{
+        textAlign: "center",
+        marginBottom: "30px",
+      }}
+    >
+      Campus Notifications
+    </h1>
 
-      {notifications.map((item) => (
-        <div key={item.ID}>
-          <h3>{item.Type}</h3>
-          <p>{item.Message}</p>
-          <small>{item.Timestamp}</small>
-          <hr />
-        </div>
-      ))}
-    </div>
-  )
+    <PriorityInbox
+      notifications={priorityNotifications}
+    />
+
+    <h2
+      style={{
+        marginBottom: "20px",
+      }}
+    >
+      All Notifications
+    </h2>
+
+    {notifications.map((item) => (
+      <NotificationCard
+        key={item.ID}
+        item={item}
+      />
+    ))}
+  </div>
+)
 }
